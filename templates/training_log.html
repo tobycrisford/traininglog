@@ -1,0 +1,44 @@
+
+<html>
+    <head>
+        <title>Training log</title>
+    </head>
+    <body>
+        <form action="/traininglog">
+            {%for opt in option_values.keys()%}
+                {{opt}}:
+                <select name="{{opt}}" id="{{opt}}" value="{{request_args.get(opt)}}">
+                {%for opt_val in option_values[opt]%}
+                    {%if opt_val == request_args.get(opt)%}
+                        <option value="{{opt_val}}" selected>{{opt_val}}</option>
+                    {%else%}
+                        <option value="{{opt_val}}">{{opt_val}}</option>
+                    {%endif%}
+                {%endfor%}
+            </select>
+            <br>
+            {%endfor%}
+            <input type="submit" value="Submit">
+        </form>
+        <svg viewBox="0 0 1800 {{elapsed_weeks*200}}" xmlns="http://www.w3.org/2000/svg">
+                {%for i in week_totals.index%}
+                    <text x="100" y="{{200*week_totals.loc[i,'total_week_number'] + 100}}" text-anchor="middle" stroke="black" stroke-width="1px", fill="black">
+                        {{week_totals.loc[i,'week_start']}}
+                    </text>
+                    <text x="1700" y="{{200*week_totals.loc[i,'total_week_number'] + 100}}" text-anchor="middle" stroke="black" stroke-width="1px", fill="black">
+                        {{week_totals.loc[i,'output']}}
+                    </text>
+                {%endfor%}
+                {%for i in output.index%}
+                    <circle cx="{{200*output.loc[i,'weekday'] + 300}}" cy="{{200*output.loc[i,'total_week_number'] + 100}}" r="{{output.loc[i,'radius']}}"/>
+                    <text x="{{200*output.loc[i,'weekday'] + 300}}" y="{{200*output.loc[i,'total_week_number'] + 100}}" text-anchor="middle" stroke="white" stroke-width="1px" fill="white">
+                        {{output.loc[i,'output']}} 
+                    </text>
+                {%endfor%}
+                {%for i in range(0,8)%}
+                    <line x1="{{200*i + 200}}" y1="0" x2="{{200*i + 200}}" y2="{{elapsed_weeks*200}}" stroke="black"/>
+                {%endfor%}
+        </svg>
+
+    </body>
+</html>
