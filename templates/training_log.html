@@ -5,6 +5,15 @@
     </head>
     <body>
         <form action="/traininglog">
+            {%for activity in activities%}
+                {%if request_args.get(activity) == activity%}
+                    <input type="checkbox" id="{{activity}}" name="{{activity}}" value="{{activity}}" checked>
+                {%else%}
+                    <input type="checkbox" id="{{activity}}" name="{{activity}}" value="{{activity}}">
+                {%endif%}
+                <label for="{{activity}}">{{activity}}</label><br>
+            {%endfor%}
+            <br>
             {%for opt in option_values.keys()%}
                 {{opt}}:
                 <select name="{{opt}}" id="{{opt}}" value="{{request_args.get(opt)}}">
