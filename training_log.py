@@ -62,8 +62,10 @@ def create_training_log():
     
     if request.args.get('measure') == 'distance':
         df_out['output'] = (df['distance'] / 100000) / (1.60934) #Convert from cm to miles
-    else:
+    elif request.args.get('measure') == 'duration':
         df_out['output'] = df['duration'] / (1000*60)
+    elif request.args.get('measure') == 'elevation':
+        df_out['output'] = df['elevationGain'] / 100.0
         
     
     df_out = df_out.groupby(['year-week','weekday','total_week_number','week_start'])['output'].aggregate(np.sum).reset_index()
@@ -72,7 +74,7 @@ def create_training_log():
     df_out['total_week_number'] = df_out['total_week_number'].max() - df_out['total_week_number'] #Show log going backwards from present
     
     option_values = {'activity': sorted(list(set(df['activityType']))), 'start': sorted(list(set(df['week_start'].astype(str)))),
-                     'end': sorted(list(set(df['week_start'].astype(str)))), 'measure': {'distance','duration'}}
+                     'end': sorted(list(set(df['week_start'].astype(str)))), 'measure': {'distance','duration','elevation'}}
     
     max_val = df_out['output'].max()
     df_out['radius'] = 100 * np.sqrt(df_out['output'] / max_val)
