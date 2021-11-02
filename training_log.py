@@ -13,6 +13,8 @@ from datetime import timedelta
 from flask import Flask, render_template, request
 import numpy as np
 import math
+import matplotlib.pyplot as plt
+import matplotlib.colors
 
 list_of_files = ['email_0_summarizedActivities.json','email_1001_summarizedActivities.json']
 
@@ -40,6 +42,8 @@ df['weekday'] = df['datetime'].apply(lambda x: x.isocalendar()[2]) - 1
 df['year-week'] = [str(df.loc[i,'year']) + '-' + str(df.loc[i,'week']).zfill(2) for i in df.index]
 
 df['total_week_number'] = df['datetime'].apply(lambda x: total_week_number(x.date(), df['datetime'].min().date()))
+
+df['total_day_number'] = df['datetime'].apply(lambda x: (x.date() - df['datetime'].min().date()).days)
 
 df['week_start'] = (df['datetime'] - df['weekday'].apply(lambda x: timedelta(days=x))).apply(lambda x: x.date())
 
@@ -72,8 +76,7 @@ def create_training_log():
         df_out['output'] = df['elevationGain'] / 100.0
         
     
-    df_out = df_out.groupby(['year-week','weekday','total_week_number','week_start'])['output'].aggregate(np.sum).reset_index()
-    df_out = df_out.sort_values(['year-week','weekday'])
+    df_out = df_out.groupby(['year-week','weekday','total_week_number','week_start','total_day_number'])['output'].aggregate(np.sum).reset_index()
     df_out['total_week_number'] = df_out['total_week_number'] - df_out['total_week_number'].min()
     df_out['total_week_number'] = df_out['total_week_number'].max() - df_out['total_week_number'] #Show log going backwards from present
     
@@ -82,6 +85,24 @@ def create_training_log():
     
     max_val = df_out['output'].max()
     df_out['radius'] = 100 * np.sqrt(df_out['output'] / max_val)
+    
+    df_out = df_out.sort_values(['total_day_number']).reset_index()
+    df_out['moving_average'] = np.array([0 for i in range(len(df_out))])
+    ratio = (1/10)**(1/14)
+    for i in range(len(df_out)):
+        if i == 0:
+            df_out['moving_average'].iloc[i] = df_out['output'].iloc[i] * (1-ratio)
+        else:
+            df_out['moving_average'].iloc[i] = (1-ratio) * df_out['output'].iloc[i] + ratio**(df_out['total_day_number'].iloc[i] - df_out['total_day_number'].iloc[i-1]) * df_out['moving_average'].iloc[i-1]
+    
+    df_out['moving_average'] = df_out['moving_average'].apply(matplotlib.colors.Normalize(vmin=df_out['moving_average'].min(), vmax=df_out['moving_average'].max()))
+    
+    def ints_to_string(x):
+        s = ''
+        for i in x:
+            s = s + str(i) + ','
+        return s[0:-1]
+    df_out['color'] = df_out['moving_average'].apply(lambda x: ints_to_string((np.array(plt.cm.bwr(x)[0:3])*255).round(0).astype(int)))
     
     elapsed_weeks = 1 + df_out['total_week_number'].max() - df_out['total_week_number'].min()
     

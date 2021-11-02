@@ -39,7 +39,7 @@
                     </text>
                 {%endfor%}
                 {%for i in output.index%}
-                    <circle cx="{{200*output.loc[i,'weekday'] + 300}}" cy="{{200*output.loc[i,'total_week_number'] + 100}}" r="{{output.loc[i,'radius']}}"/>
+                    <circle cx="{{200*output.loc[i,'weekday'] + 300}}" cy="{{200*output.loc[i,'total_week_number'] + 100}}" r="{{output.loc[i,'radius']}}" fill="rgb({{output.loc[i,'color']}})"/>
                     <text x="{{200*output.loc[i,'weekday'] + 300}}" y="{{200*output.loc[i,'total_week_number'] + 100}}" text-anchor="middle" stroke="white" stroke-width="1px" fill="white">
                         {{output.loc[i,'output']}} 
                     </text>
