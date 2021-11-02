@@ -43,14 +43,20 @@ df['total_week_number'] = df['datetime'].apply(lambda x: total_week_number(x.dat
 
 df['week_start'] = (df['datetime'] - df['weekday'].apply(lambda x: timedelta(days=x))).apply(lambda x: x.date())
 
+#Some Garmin activities are wrongly duplicated - deal with that here
+df = df[~df.duplicated(subset='beginTimestamp',keep='first')]
+
 app = Flask(__name__)
 print(__name__)
 
 @app.route('/traininglog')
 def create_training_log():
-    df_out = df[(df['activityType'] == request.args.get('activity')) & \
-                (df['week_start'] >= datetime.datetime.strptime(request.args.get('start'), '%Y-%m-%d').date()) & \
-                (df['week_start'] <= datetime.datetime.strptime(request.args.get('end'), '%Y-%m-%d').date())].copy()
+    if not (request.args.get('activity') is None):
+        df_out = df[(df['activityType'] == request.args.get('activity')) & \
+                    (df['week_start'] >= datetime.datetime.strptime(request.args.get('start'), '%Y-%m-%d').date()) & \
+                    (df['week_start'] <= datetime.datetime.strptime(request.args.get('end'), '%Y-%m-%d').date())].copy()
+    else:
+        df_out = df[df['activityType'] == '']
         
 
     
