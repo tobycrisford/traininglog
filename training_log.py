@@ -74,6 +74,8 @@ def create_training_log():
         df_out['output'] = df['duration'] / (1000*60)
     elif request.args.get('measure') == 'elevation':
         df_out['output'] = df['elevationGain'] / 100.0
+    else:
+        df_out['output'] = 0
         
     
     df_out = df_out.groupby(['year-week','weekday','total_week_number','week_start','total_day_number'])['output'].aggregate(np.sum).reset_index()
@@ -91,9 +93,9 @@ def create_training_log():
     ratio = (1/10)**(1/14)
     for i in range(len(df_out)):
         if i == 0:
-            df_out['moving_average'].iloc[i] = df_out['output'].iloc[i] * (1-ratio)
+            df_out.loc[i,'moving_average'] = df_out.loc[i,'output'] * (1-ratio)
         else:
-            df_out['moving_average'].iloc[i] = (1-ratio) * df_out['output'].iloc[i] + ratio**(df_out['total_day_number'].iloc[i] - df_out['total_day_number'].iloc[i-1]) * df_out['moving_average'].iloc[i-1]
+            df_out.loc[i,'moving_average'] = (1-ratio) * df_out.loc[i,'output'] + ratio**(df_out.loc[i,'total_day_number'] - df_out.loc[i-1,'total_day_number']) * df_out.loc[i-1,'moving_average']
     
     df_out['moving_average'] = df_out['moving_average'].apply(matplotlib.colors.Normalize(vmin=df_out['moving_average'].min(), vmax=df_out['moving_average'].max()))
     
