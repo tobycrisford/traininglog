@@ -104,7 +104,7 @@ def create_training_log():
         for i in x:
             s = s + str(i) + ','
         return s[0:-1]
-    df_out['color'] = df_out['moving_average'].apply(lambda x: ints_to_string((np.array(plt.cm.bwr(x)[0:3])*255).round(0).astype(int)))
+    df_out['color'] = df_out['moving_average'].apply(lambda x: ints_to_string((np.array(plt.cm.jet(x)[0:3])*255).round(0).astype(int)))
     
     elapsed_weeks = 1 + df_out['total_week_number'].max() - df_out['total_week_number'].min()
     
