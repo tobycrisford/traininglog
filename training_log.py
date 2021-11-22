@@ -16,15 +16,17 @@ import math
 import matplotlib.pyplot as plt
 import matplotlib.colors
 
-list_of_files = ['email_0_summarizedActivities.json','email_1001_summarizedActivities.json']
+list_of_files = ['activity_data.json']
 
 dfs = []
 for f in list_of_files:
     file = open(f,)
     data = json.load(file)
-    dfs.append(pd.DataFrame(data[0]['summarizedActivitiesExport']))
+    dfs.append(pd.DataFrame(data))
 df = pd.concat(dfs)
 df = df.reset_index()
+
+df['activityType'] = df['activityType'].apply(lambda x: x['typeKey'])
 
 def total_week_number(d, start):
     day_gap = ((d - start).days)
@@ -69,11 +71,11 @@ def create_training_log():
 
     
     if request.args.get('measure') == 'distance':
-        df_out['output'] = (df['distance'] / 100000) / (1.60934) #Convert from cm to miles
+        df_out['output'] = (df['distance'] / 1000) / (1.60934) #Convert from cm to miles
     elif request.args.get('measure') == 'duration':
-        df_out['output'] = df['duration'] / (1000*60)
+        df_out['output'] = df['duration'] / (60)
     elif request.args.get('measure') == 'elevation':
-        df_out['output'] = df['elevationGain'] / 100.0
+        df_out['output'] = df['elevationGain']
     else:
         df_out['output'] = 0
         
