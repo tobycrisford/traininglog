@@ -49,7 +49,7 @@ df['total_day_number'] = df['datetime'].apply(lambda x: (x.date() - df['datetime
 
 df['week_start'] = (df['datetime'] - df['weekday'].apply(lambda x: timedelta(days=x))).apply(lambda x: x.date())
 
-#Some Garmin activities are wrongly duplicated - deal with that here
+#Some activities are wrongly duplicated - deal with that here
 df = df[~df.duplicated(subset='beginTimestamp',keep='first')]
 
 activities = sorted(list(set(df['activityType'])))
